@@ -1,6 +1,6 @@
 %define        pkgname     systemd-swap
 %global        forgeurl    https://github.com/Nefelim4ag/%{pkgname}
-Version:       4.1.0
+Version:       4.3.0
 %global        tag         %{version}
 
 %forgemeta -i
@@ -21,9 +21,6 @@ BuildRequires: systemd-units
 %endif
 %{?systemd_requires}
 
-BuildRequires: help2man
-BuildRequires: fakeroot
-
 # support for zram
 Requires: util-linux
 Requires: kmod
@@ -33,29 +30,15 @@ Requires: kmod
 Requires: kmod(zram.ko)
 
 %description
-Manage swap on:
-    zswap - Enable/Configure
-    zram - Autoconfigurating
-    files - (sparse files for saving space, support btrfs)
-    block devices - auto find and do swapon
-It is configurable in /etc/systemd/swap.conf
+Systemd-swap manages the configuration of zram and zswap and allows for automatically setting up swap files through swapfc and automatically enables availible swapfiles and swap partitions.
 
 %prep
 %forgeautosetup -p1
-# preserve timestamps
-sed -i -r 's:install -:\0p -:' Makefile
 
 %build
-# nothing
 
 %install
-%make_install PREFIX=%{buildroot}
-pushd %{buildroot}
-install -d .%{_unitdir}
-find . -name '*.service' -print -exec mv '{}' .%{_unitdir} \;
-install -d .%{_mandir}/man1
-fakeroot help2man -o .%{_mandir}/man1/%{name}.1 .%{_bindir}/%{name}
-
+%make_install
 
 %post
 %systemd_post systemd-swap.service
@@ -66,20 +49,26 @@ fakeroot help2man -o .%{_mandir}/man1/%{name}.1 .%{_bindir}/%{name}
 %postun
 %systemd_postun_with_restart systemd-swap.service
 
-
 %files
 %license LICENSE
 %doc README.md
 %config(noreplace) %{_sysconfdir}/systemd/swap.conf
-%{_unitdir}/*.service
-%{_bindir}/%{name}
-%{_mandir}/man1/%{name}.1*
+%{_unitdir}/%{pkgname}.service
+%{_bindir}/%{pkgname}
+%{_mandir}/man5/swap.conf.5*
+%{_mandir}/man8/%{pkgname}.8*
+%dir %{_datadir}/%{pkgname}/
+%{_datadir}/%{pkgname}/swap-default.conf
+
 %ghost %dir %{_sharedstatedir}/%{pkgname}
 %ghost %dir %{_sharedstatedir}/%{pkgname}/swapfc
 %ghost %{_sharedstatedir}/%{pkgname}/*
 
 
 %changelog
+* Sat Jun 13 2020 zeno <zeno@bafh.org> - 4.2.0
+- bump to new stable release
+
 * Sun Jun 07 2020 zeno <zeno@bafh.org> - 4.1.0
 - bump to new stable release
 

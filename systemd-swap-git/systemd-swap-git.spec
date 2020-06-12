@@ -1,16 +1,14 @@
 %define        pkgname     systemd-swap
 %global        forgeurl    https://github.com/Nefelim4ag/%{pkgname}
-%global        commit      b637fe45b224f7bd8e56e82202e50a5cfbcac081
-%global        branch      man
+%global        commit      bc7b3866e23546a9c8559017ac279c238c5713ec
 
-
-Version:       4.2.0
+Version:       4.4.0
 
 %forgemeta -i
 
 Name: %{pkgname}-git
 Summary: Creating hybrid swap space from zram swaps, swap files and swap partitions
-Release: 1%{?dist}
+Release: 0%{?dist}
 License: GPLv3+
 URL:     %{forgeurl}
 Source:  %{forgesource}
@@ -36,23 +34,15 @@ Requires: kmod
 Requires: kmod(zram.ko)
 
 %description
-Manage swap on:
-    zswap - Enable/Configure
-    zram - Autoconfigurating
-    files - (sparse files for saving space, support btrfs)
-    block devices - auto find and do swapon
-It is configurable in /etc/systemd/swap.conf
+Systemd-swap manages the configuration of zram and zswap and allows for automatically setting up swap files through swapfc and automatically enables availible swapfiles and swap partitions.
 
 %prep
 %forgeautosetup -p1
-# preserve timestamps
-sed -i -r 's:install -:\0p -:' Makefile
 
 %build
-# nothing
 
 %install
-%make_install PREFIX=%{buildroot}
+%make_install
 
 %post
 %systemd_post systemd-swap.service
@@ -63,12 +53,11 @@ sed -i -r 's:install -:\0p -:' Makefile
 %postun
 %systemd_postun_with_restart systemd-swap.service
 
-
 %files
 %license LICENSE
 %doc README.md
 %config(noreplace) %{_sysconfdir}/systemd/swap.conf
-%{_unitdir}/*.service
+%{_unitdir}/%{pkgname}.service
 %{_bindir}/%{pkgname}
 %{_mandir}/man5/swap.conf.5*
 %{_mandir}/man8/%{pkgname}.8*
@@ -81,7 +70,7 @@ sed -i -r 's:install -:\0p -:' Makefile
 
 
 %changelog
-* Mon Jun 01 2020 zeno <zeno@bafh.org> - 4.2.0
+* Mon Jun 01 2020 zeno <zeno@bafh.org> - 4.2.0-3
 - use development version
 
 * Fri Jan 31 2020 Fedora Release Engineering <releng@fedoraproject.org> - 3.3.0-5
